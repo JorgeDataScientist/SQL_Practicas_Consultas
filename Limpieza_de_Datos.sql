@@ -1,7 +1,7 @@
 use empleadoss_departamentoss;
 
 /* Cambiando Nombres de Columnas de la tabla expleados */
-ALTER TABLE empleados CHANGE nDIEmp IdEmpleados varchar(12) COLLATE utf8_bin NOT NULL;
+ALTER TABLE empleados CHANGE CarnetIdentidad CIdentidad float NOT NULL;
 
 ALTER TABLE empleados CHANGE nombre Nombre varchar(30) COLLATE utf8_bin NOT NULL;
 
