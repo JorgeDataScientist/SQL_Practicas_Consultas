@@ -2,15 +2,15 @@ use empleadoss_departamentoss;
 
 /* 1. Obtener los datos completos de los empleados. */
 select * 
-from empleados;
+from empleadoss_departamentoss.empleados;
 
 /* 2. Obtener los datos completos de los departamentos */
 select * 
-from departamentos;
+from empleadoss_departamentoss.departamentos;
 
 /* 3. Obtener los datos de los empleados con cargo 'Secretaria'. */
 select * 
-from empleados 
+from empleadoss_departamentoss.empleados 
 where Cargo='Secretaria';
 
 /* 4. Obtener el nombre y salario de los empleados. */
@@ -164,7 +164,18 @@ from empleados
 where salario between (comisiones/2) and comisiones;
 
 /* 25. Mostrar el salario más alto de la empresa. */
-select 	nombre, max(Salario) as Salario_mayor from empleadoss_departamentoss.empleados;
+SELECT nombre, cargo, salario
+FROM empleadoss_departamentoss.empleados
+WHERE salario = (SELECT MAX(salario) FROM empleadoss_departamentoss.empleados);
+/* 25.1 Mostrar el salario menor de la empresa. */
+SELECT nombre, cargo, salario
+FROM empleadoss_departamentoss.empleados
+WHERE salario = (SELECT MIN(salario) FROM empleadoss_departamentoss.empleados);
+/* 25.2 Mostrar el nombre del empleado con el salario mas alto*/
+SELECT nombre
+FROM empleadoss_departamentoss.empleados
+WHERE salario = (SELECT MAX(salario) FROM empleadoss_departamentoss.empleados);
+
 
 /* ------------------------------------------ */ 
 use empleadoss_departamentoss;
@@ -181,13 +192,23 @@ select 	comisiones, count(*) as Num_empleados
 from empleadoss_departamentoss.empleados 
 group by comisiones 
 having comisiones > 0;
+/* 26.1 */
+SELECT comisiones, COUNT(*) as Num_empleados
+FROM empleadoss_departamentoss.empleados
+WHERE comisiones IS NOT NULL
+GROUP BY comisiones
+HAVING comisiones > 0;
+
 
 /* 27. Mostrar el nombre del último empleado de la lista por orden alfabético, su salario y cargo. */
 select max(nombre) as Mayor_alfabeticamente, salario, cargo  
 from empleadoss_departamentoss.empleados;
 
 /* 28. Hallar el salario más alto, el más bajo y la diferencia entre ellos. */
-select 	max(salario) as Salario_mayor, min(salario) as Salario_menor, max(salario) - min(salario) as 'Diferencia_de_Salario' 
+select 
+max(salario) as Salario_mayor, 
+min(salario) as Salario_menor,
+max(salario) - min(salario) as 'Diferencia_de_Salario' 
 from empleadoss_departamentoss.empleados;
 
 /* 29. Mostrar el número de empleados de sexo femenino y de sexo masculino, por departamento. */
@@ -211,47 +232,63 @@ SELECT codDepto, ROUND(AVG(salario), 2) AS promedio_salarios
 FROM empleadoss_departamentoss.empleados
 GROUP BY codDepto;
 
+/* ------------------------------------------ */ 
+use empleadoss_departamentoss;
+
+select * 
+from empleadoss_departamentoss.empleados;
+
+select * 
+from empleadoss_departamentoss.departamentos;
 /* ------------------------------------------ */
+
 /* 31. Mostrar la lista de los empleados cuyo salario es mayor o igual que el promedio de la empresa. Ordenarlo por departamento. */
 select CarnetIdentidad, nombre, salario 
 from empleadoss_departamentoss.empleados
 where salario >= (select avg(salario) from empleadoss_departamentoss.empleados)
 order by codDepto asc;
 
-32. Hallar los departamentos que tienen más de tres empleados. Mostrar el número de empleados de esos departamentos.
+/* 32. Hallar los departamentos que tienen más de tres empleados. Mostrar el número de empleados de esos departamentos. */
 
-select d.codDepto, d.nombreDpto, count(*) as 'Num empleados' 
-from departamentos d, empleados e 
+select d.codDepto, d.nombreDpto, count(*) as 'Num_empleados' 
+from empleadoss_departamentoss.departamentos d, empleadoss_departamentoss.empleados e 
 where d.codDepto=e.codDepto 
 group by d.codDepto 
 having count(*) >= 3;
 
 
-33. Mostrar el código y nombre de cada jefe, junto al número de empleados que dirige. Solo los que tengan mas de dos empleados y ordenados de mayor a menor.
+/* 33. Mostrar el código y nombre de cada jefe, junto al número de empleados que dirige. Solo los que tengan mas de dos empleados y ordenados de mayor a menor. */
 
-select j.nDIEmp, j.nomEmp, count(*) as 'Num Empleados' 
-from empleados e, empleados j 
-where e.jefeID=j.nDIEmp 
-group by j.nomEmp 
-having count(*)>=2 
+select j.CarnetIdentidad, j.Nombre, count(*) as 'Num_Empleados' 
+from empleadoss_departamentoss.empleados e, empleadoss_departamentoss.empleados j 
+where e.IdJefe=j.CarnetIdentidad 
+group by j.Nombre 
 order by count(*) desc;
 
+SELECT j.CarnetIdentidad, j.Nombre, COUNT(e.CarnetIdentidad) AS Num_Empleados
+FROM empleadoss_departamentoss.empleados e
+INNER JOIN empleadoss_departamentoss.empleados j ON e.IdJefe = j.CarnetIdentidad
+GROUP BY j.CarnetIdentidad, j.Nombre
+HAVING COUNT(e.CarnetIdentidad) > 0
+ORDER BY COUNT(e.CarnetIdentidad) DESC;
 
-34. Hallar los departamentos que no tienen empleados
+
+
+/* 34. Hallar los departamentos que no tienen empleados */
 
 select d.codDepto, d.nombreDpto 
-from departamentos d, empleados e 
+from empleadoss_departamentoss.departamentos d, empleadoss_departamentoss.empleados e 
 where d.codDepto=e.codDepto 
 group by d.codDepto 
 having count(*) = 0;
 
-35. Mostrar el nombre del departamento cuya suma de salarios sea la más alta, indicando el valor de la
-suma.
 
-select d.nombreDpto, sum(e.salEmp) 
-from departamentos d, empleados e 
+/* 35. Mostrar el nombre del departamento cuya suma de salarios sea la más alta, indicando el valor de la suma. */
+
+select d.nombreDpto, sum(e.salario) 
+from empleadoss_departamentoss.departamentos d, empleadoss_departamentoss.empleados e 
 where d.codDepto=e.codDepto 
 group by d.nombreDpto 
-order by  sum(e.salEmp) desc 
+order by  sum(e.salario) desc 
 limit 1;
 /* ------------------------------------------ */
